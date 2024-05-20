@@ -1,0 +1,291 @@
+Asztali Alkalmazás Kezdés
+
+
+Elnevezed Konzolos Alkalmazas
+
+ctrl shift p 
+
+Java create project
+
+No build tools
+
+Select 
+
+
+src - katt
+
+
+
+1.
+App.java - átírod a nevét arra ami a feladatban van 
+
+ 
+src new file 
+
+Connect.java
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class Connect {
+    
+    private Connection conn;
+
+    public Connect(){
+
+        conn = null;
+
+    }
+    public void connecting(){
+        String connectStr = "jdbc:mariadb://localhost:3306/diakdu_konyvtardu?user=diakdu&password=123";
+
+
+        try {
+
+            conn = DriverManager.getConnection( connectStr );
+
+        } catch (SQLException e) {
+         System.out.println("Hiba a kapcsolódás során");
+        }
+        /*if (conn != null) {
+            System.out.println("Ok");
+        }else{
+            System.out.println("Nincs kapcsolat");
+        }*/
+    }
+    public Connection getConnection(){return conn;}
+}
+
+
+
+
+2.       Ezt át kell írni ha használod!
+src katt
+
+new file
+
+(Itt át kell írnod egy pár  dolgot a kódban!) 
+
+DatabaseController.java
+
+
+import java.sql.Connection;
+import java.sql.Date;
+import java. util.ArrayList;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+
+
+
+public class DatabaseController {
+
+        private Connection conn;
+        private String lenderFile;
+        private String lendingFile;
+        int counter = 0;
+
+    public DatabaseController(String lenderFile, String lendingFile){
+        
+        this.lenderFile = lenderFile;
+        this.lendingFile = lendingFile;
+
+
+      buildConnection();
+    }
+
+    private void buildConnection(){
+        Connect connect =new Connect();
+        connect.connecting();
+        conn = connect.getConnection();
+        if (conn == null) {
+            System.out.println("buildConnection conn == null");
+        }
+    }
+
+    public int setLendersTable(){
+        ArrayList<Lender> lenders = new ArrayList<>();
+        FileController fileCtr = new FileController();
+        lenders = fileCtr.ReadKolcsonzok(lenderFile);
+
+        String sql = "INSERT INTO lenders(name,born) VALUES" +
+                 "(?,?)";
+        PreparedStatement pstmt = null;
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+
+            for(Lender len : lenders){
+
+                pstmt .setString(1, len.getName());
+                System.out.println(len.getBorn());
+                pstmt.setDate(2, Date.valueOf(len.getBorn()));
+
+                pstmt.executeQuery();
+
+                counter++;
+
+            }
+        } catch (SQLException e) {
+            System.out.println("Hiba az írás során");
+        }
+
+        return counter;
+    }
+
+    public int setLendingsTable(){
+        ArrayList<Lending> lendings = new ArrayList<>();
+        FileController fileCtr = new FileController();
+        lendings = fileCtr.ReadKolcsonzesek(lendingFile);
+        String sql = "INSERT INTO lendings(writer,type,title,lender_id) VALUES" +  
+        "( ?,?,?,?)";
+        PreparedStatement pstmt = null;
+
+        try {
+            
+
+            for(Lending len : lendings){
+                pstmt = conn.prepareStatement(sql);
+                pstmt .setString(1, len.getWriter());
+                pstmt .setString(2, len.getType());
+                pstmt .setString(3, len.getTitle());
+                pstmt .setInt(4, Integer.parseInt(len.getLender_id()));;
+             
+
+                pstmt.executeQuery();
+
+                counter++;
+
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return counter;
+    }
+    
+
+
+}
+
+
+
+
+
+
+
+3.  Ezt át kell írni ha használod!
+src 
+new file
+
+FileController
+
+
+
+
+import java.io.FileReader;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+
+public class FileController {
+
+    public FileController(){
+
+    }
+    public ArrayList<Lending>ReadKolcsonzesek(String fileName){
+
+        FileReader fr = null;
+
+        try {
+            
+            fr = new FileReader("../" + fileName);
+
+        } catch (FileNotFoundException ex) {
+          System.out.println("Nincs meg a fájl");
+        }
+
+        Scanner scanner = new Scanner(fr);
+        ArrayList<Lending> lendings = new ArrayList<>();
+        scanner.nextLine();
+
+        while(scanner.hasNext()){
+            String row = scanner.nextLine();
+            String[] rowSp = row.split(";");
+            Lending lending = new Lending();
+            lending.setLender_id(rowSp[0]);
+            lending.setWriter(rowSp[1]);
+            lending.setType(rowSp[2]);
+            lending.setTitle(rowSp[3]);
+
+            lendings.add(lending);
+
+        }
+       return lendings;
+    }
+    public ArrayList<Lender>ReadKolcsonzok(String fileName){
+
+        FileReader fr = null;
+
+        try {
+            
+            //fr = new FileReader("../" + fileName);
+            fr = new FileReader(fileName);
+
+
+        } catch (FileNotFoundException ex) {
+          System.out.println("Nincs meg a fájl");
+        }
+
+        Scanner scanner = new Scanner(fr);
+        ArrayList<Lender> lenders = new ArrayList<>();
+        scanner.nextLine();
+
+        while(scanner.hasNext()){
+            String row = scanner.nextLine();
+            String[] rowSp = row.split(";");
+            Lender lender = new Lender();
+            lender.setName (rowSp[0]);
+            lender.setBorn(rowSp[1]);
+            
+
+            lenders.add(lender);
+
+        }
+        
+       return lenders;
+    }
+}
+
+
+
+
+
+4.
+
+src 
+new file
+
+és létre hozod a feladat alapján amit kell az osztályokat
+
+
+
+pl Seller
+
+akkor 
+Public class Seller{
+   
+private (int id)
+private (String Name)
+}
+
+
+vagy pl; Add 
+
+
+public class Add {
+
+    private int id megadod ami a feladatban van
+    private String
+
